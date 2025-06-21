@@ -1,0 +1,17 @@
+{% extends 'clients/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mt-5">Добро пожаловать в Фитнес-центр!</h1>
+    
+    {% if user.is_authenticated %}
+        <div class="alert alert-success mt-4">
+            Вы вошли как <strong>{{ user.username }}</strong>.
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4">
+            Пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'register' %}">зарегистрируйтесь</a>.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
