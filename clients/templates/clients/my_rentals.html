@@ -1,0 +1,53 @@
+{% extends 'clients/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Мои аренды</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Оборудование</th>
+                    <th>Дата аренды</th>
+                    <th>Дата возврата</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rental in object_list %}
+                <tr>
+                    <td>{{ rental.equipment.name }}</td>
+                    <td>{{ rental.rented_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if rental.returned_at %}
+                            {{ rental.returned_at|date:"d.m.Y H:i" }}
+                        {% else %}
+                            <span class="text-danger">Не возвращено</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not rental.returned_at %}
+                        <a href="{% url 'return_equipment' rental.pk %}" 
+                           class="btn btn-sm btn-warning">
+                            Вернуть
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">У вас нет активных аренд</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

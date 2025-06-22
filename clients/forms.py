@@ -1,8 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model  # Добавьте этот импорт
 from django.core.validators import RegexValidator, MinLengthValidator
 from django.core.exceptions import ValidationError
+
+User = get_user_model()  # Получаем активную модель пользователя
 
 class UserRegisterForm(UserCreationForm):
     username = forms.CharField(
@@ -36,7 +38,7 @@ class UserRegisterForm(UserCreationForm):
         return username
 
     class Meta:
-        model = User
+        model = User  # Теперь использует вашу кастомную модель
         fields = ['username', 'password1', 'password2']
 
 class UserLoginForm(AuthenticationForm):

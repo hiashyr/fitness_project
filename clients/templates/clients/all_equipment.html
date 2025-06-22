@@ -1,0 +1,48 @@
+{% extends 'clients/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Весь инвентарь</h2>
+    
+    <div class="mb-3">
+        <a href="{% url 'trainer_rentals' %}" class="btn btn-info">
+            История аренд
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Статус</th>
+                    <th>Дата добавления</th>
+                    <th>Текущая аренда</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in equipment %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>
+                        <span class="badge bg-{% if item.status == 'available' %}success{% elif item.status == 'rented' %}warning{% else %}secondary{% endif %}">
+                            {{ item.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ item.added_at|date:"d.m.Y" }}</td>
+                    <td>
+                        {% if item.status == 'rented' %}
+                            {% with rental=item.rental_set.last %}
+                                {{ rental.client.username }} (с {{ rental.rented_at|date:"d.m.Y" }})
+                            {% endwith %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
