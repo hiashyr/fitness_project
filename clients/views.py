@@ -36,7 +36,44 @@ class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_trainer()
     
     def get_queryset(self):
-        return Rental.objects.all().order_by('-rented_at')
+        queryset = Rental.objects.all().select_related('client', 'equipment').order_by('-rented_at')
+        
+        # Фильтрация по статусу
+        status = self.request.GET.get('status')
+        if status == 'active':
+            queryset = queryset.filter(returned_at__isnull=True)
+        elif status == 'returned':
+            queryset = queryset.filter(returned_at__isnull=False)
+            
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        # Обработка экспорта в CSV
+        if request.GET.get('export') == 'csv':
+            return self.export_to_csv()
+        return super().get(request, *args, **kwargs)
+    
+    def export_to_csv(self):
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="rentals_history.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Клиент', 'Оборудование', 'Дата аренды', 'Дата возврата', 'Статус'])
+        
+        for rental in self.get_queryset():
+            status = 'Завершена' if rental.returned_at else 'Активна'
+            writer.writerow([
+                rental.client.username,
+                rental.equipment.name,
+                rental.rented_at.strftime('%d.%m.%Y %H:%M'),
+                rental.returned_at.strftime('%d.%m.%Y %H:%M') if rental.returned_at else '',
+                status
+            ])
+        
+        return response
 
 def home(request):
     """Главная страница"""

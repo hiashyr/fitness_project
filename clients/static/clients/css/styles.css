@@ -1,94 +1,165 @@
-/* Основные стили */
+:root {
+    --primary-blue: #1E6FFE;
+    --secondary-blue: #1e7d86;
+    --light-blue: #e6f2ff;
+    --dark-blue: #0d47a1;
+}
+
 body {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
     background-color: #f8f9fa;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding-top: 20px;
 }
 
 /* Навигационная панель */
 .navbar {
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    padding: 1rem 0;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand {
-    font-weight: 600;
+    font-size: 1.5rem;
 }
 
-.nav-item.nav-link {
+.nav-link {
+    font-weight: 500;
     padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
 }
 
-/* Карточки форм */
-.card {
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+.nav-link:hover {
+    color: var(--primary-blue) !important;
 }
 
-.card-header {
-    border-radius: 8px 8px 0 0 !important;
-    padding: 1.25rem;
-}
-
-.card-body {
-    padding: 2rem;
+.nav-link.active {
+    color: var(--primary-blue) !important;
 }
 
 /* Кнопки */
 .btn-primary {
-    background-color: #4e73df;
-    border-color: #4e73df;
-    padding: 10px;
-    font-weight: 600;
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #3a5ccc;
-    border-color: #3a5ccc;
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+}
+
+.btn-outline-primary {
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+/* Основное содержимое */
+main {
+    padding: 2rem 0;
+}
+
+/* Карточки */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Подвал */
+.footer {
+    background-color: #212529;
+}
+
+.footer a {
+    color: var(--light-blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+/* Сообщения */
+.alert {
+    border-radius: 8px;
 }
 
 /* Формы */
-.form-control {
-    padding: 10px 15px;
-    border-radius: 4px;
-    border: 1px solid #d1d3e2;
-}
-
 .form-control:focus {
-    border-color: #bac8f3;
-    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.25rem rgba(30, 111, 254, 0.25);
 }
 
-/* Ошибки валидации */
-.is-invalid {
-    border-color: #e74a3b !important;
-}
-
-.invalid-feedback {
-    color: #e74a3b;
-    font-size: 0.875em;
-    margin-top: 0.25rem;
-}
-
-.alert-danger {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    color: #721c24;
-}
-
-/* Футер */
-.footer {
-    margin-top: 50px;
-    padding: 20px 0;
-    background-color: #343a40;
-    color: white;
-    text-align: center;
+/* Hero секция */
+.hero-section {
+    background: linear-gradient(135deg, #f5f9ff 0%, #e6f2ff 100%);
+    padding: 5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-    .card-body {
-        padding: 1.5rem;
+    .navbar-brand {
+        font-size: 1.25rem;
     }
+    
+    .hero-section {
+        padding: 3rem 0;
+    }
+}
+
+
+/* Стили для таблицы истории аренд */
+.table-hover tbody tr:hover {
+    background-color: rgba(30, 111, 254, 0.05);
+}
+
+.table th {
+    font-weight: 500;
+    color: #495057;
+    border-top: none;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    padding: 12px 16px;
+}
+
+.badge {
+    padding: 6px 10px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+/* Пагинация */
+.page-item.active .page-link {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.page-link {
+    color: var(--primary-blue);
+}
+
+.page-link:hover {
+    color: var(--dark-blue);
 }

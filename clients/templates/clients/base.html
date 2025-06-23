@@ -15,108 +15,133 @@
     
     <!-- Font Awesome для иконок -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     <!-- Шапка/меню -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-dumbbell me-2"></i>Фитнес-центр
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
-                        <!-- Основные пункты меню для всех авторизованных -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'equipment_list' %}">
-                                <i class="fas fa-list me-1"></i> Оборудование
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'my_rentals' %}">
-                                <i class="fas fa-clipboard-list me-1"></i> Мои аренды
-                            </a>
-                        </li>
-                        
-                        <!-- Меню тренера -->
-                        {% if user.is_trainer %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="trainerDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-tie me-1"></i> Тренер
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'trainer_equipment' %}">
-                                        <i class="fas fa-dumbbell me-1"></i> Весь инвентарь
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'trainer_rentals' %}">
-                                        <i class="fas fa-history me-1"></i> История аренд
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                    <i class="fas fa-dumbbell text-primary me-2"></i>Фитнес<span class="text-primary">Клуб</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'equipment_list' %}">
+                                    <i class="fas fa-list me-1"></i> Оборудование
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'my_rentals' %}">
+                                    <i class="fas fa-clipboard-list me-1"></i> Мои аренды
+                                </a>
+                            </li>
+                            
+                            {% if user.is_trainer %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="trainerDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-tie me-1"></i> Тренер
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'trainer_equipment' %}">
+                                            <i class="fas fa-dumbbell me-1"></i> Весь инвентарь
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'trainer_rentals' %}">
+                                            <i class="fas fa-history me-1"></i> История аренд
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </ul>
-                
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <!-- Меню пользователя -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i> {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                {% if user.is_staff or user.groups.all.0.name == 'Administrations' %}
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-1"></i> {{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    {% if user.is_staff %}
                                     <li>
                                         <a class="dropdown-item" href="{% url 'admin:index' %}">
                                             <i class="fas fa-cog me-1"></i> Админка
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
-                                {% endif %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'logout' %}">
-                                        <i class="fas fa-sign-out-alt me-1"></i> Выйти
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <!-- Гости -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i> Вход
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">
-                                <i class="fas fa-user-plus me-1"></i> Регистрация
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+                                    {% endif %}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'logout' %}">
+                                            <i class="fas fa-sign-out-alt me-1"></i> Выйти
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Вход
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary ms-2" href="{% url 'register' %}">
+                                    <i class="fas fa-user-plus me-1"></i> Регистрация
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
+
     <!-- Основное содержимое -->
-    <main class="container my-4">
-        {% include 'clients/messages.html' %}
-        {% block content %}
-        <!-- Сюда будет подставляться контент других шаблонов -->
-        {% endblock %}
+    <main class="flex-grow-1">
+        <div class="container my-4">
+            {% include 'clients/messages.html' %}
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
     <!-- Подвал -->
-    <footer class="footer py-3 bg-dark text-white mt-auto">
-        <div class="container text-center">
-            <p class="mb-0">&copy; {% now "Y" %} Фитнес-центр. Все права защищены.</p>
+    <footer class="footer py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="text-primary">ФитнесКлуб</h5>
+                    <p>Профессиональное оборудование для ваших тренировок</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Контакты</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> г. Москва, ул. Спортивная, 15</li>
+                        <li><i class="fas fa-phone me-2"></i> +7 (495) 123-45-67</li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Часы работы</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-clock me-2"></i> Пн-Пт: 7:00 - 23:00</li>
+                        <li><i class="fas fa-clock me-2"></i> Сб-Вс: 8:00 - 22:00</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center">
+                <p class="mb-0">&copy; {% now "Y" %} ФитнесКлуб. Все права защищены.</p>
+            </div>
         </div>
     </footer>
 
@@ -124,14 +149,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Кастомные скрипты -->
-    <script>
-    // Активация всплывающих подсказок
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-    })
-    </script>
+    <script src="{% static 'clients/js/main.js' %}"></script>
 </body>
 </html>
