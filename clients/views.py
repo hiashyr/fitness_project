@@ -1,44 +1,53 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from .models import Equipment, Rental
-from .forms import UserRegisterForm
+from django.db.models import Q
 from django.contrib.auth import login, logout
-from django.contrib.auth.forms import AuthenticationForm  # Добавлен этот импорт
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
-from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from datetime import timedelta
+
 from .models import Equipment, Rental
+from .forms import UserRegisterForm, RentEquipmentForm
 
 def trainer_check(user):
+    """Проверка, является ли пользователь тренером"""
     return user.is_trainer()
 
 class AllEquipmentView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """Просмотр всего оборудования для тренеров"""
     model = Equipment
     template_name = 'clients/trainer/all_equipment.html'
     context_object_name = 'equipment'
-    
+    paginate_by = 20
+
     def test_func(self):
         return self.request.user.is_trainer()
     
     def get_queryset(self):
-        return Equipment.objects.all().order_by('status', 'name')
+        return Equipment.objects.all() \
+            .select_related() \
+            .order_by('status', 'name')
 
 class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """История аренд для тренеров"""
     model = Rental
     template_name = 'clients/trainer/rental_history.html'
     context_object_name = 'rentals'
     paginate_by = 20
+    ordering = ['-start_time']
     
     def test_func(self):
         return self.request.user.is_trainer()
     
     def get_queryset(self):
-        queryset = Rental.objects.all().select_related('client', 'equipment').order_by('-rented_at')
+        queryset = super().get_queryset() \
+            .select_related('client', 'equipment')
         
-        # Фильтрация по статусу
         status = self.request.GET.get('status')
         if status == 'active':
             queryset = queryset.filter(returned_at__isnull=True)
@@ -48,12 +57,12 @@ class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return queryset
     
     def get(self, request, *args, **kwargs):
-        # Обработка экспорта в CSV
         if request.GET.get('export') == 'csv':
             return self.export_to_csv()
         return super().get(request, *args, **kwargs)
     
     def export_to_csv(self):
+        """Экспорт истории аренд в CSV"""
         import csv
         from django.http import HttpResponse
         
@@ -61,26 +70,33 @@ class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         response['Content-Disposition'] = 'attachment; filename="rentals_history.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['Клиент', 'Оборудование', 'Дата аренды', 'Дата возврата', 'Статус'])
+        writer.writerow([
+            'Клиент', 'Оборудование', 
+            'Начало аренды', 'Конец аренды', 
+            'Возвращено', 'Статус', 'Длительность (ч)'
+        ])
         
         for rental in self.get_queryset():
             status = 'Завершена' if rental.returned_at else 'Активна'
+            duration = rental.duration / 60 if hasattr(rental, 'duration') else 0
+            
             writer.writerow([
                 rental.client.username,
                 rental.equipment.name,
-                rental.rented_at.strftime('%d.%m.%Y %H:%M'),
+                rental.start_time.strftime('%d.%m.%Y %H:%M'),
+                rental.end_time.strftime('%d.%m.%Y %H:%M'),
                 rental.returned_at.strftime('%d.%m.%Y %H:%M') if rental.returned_at else '',
-                status
+                status,
+                f"{duration:.1f}"
             ])
         
         return response
 
 def home(request):
     """Главная страница"""
-    context = {
+    return render(request, 'clients/home.html', {
         'title': 'Главная страница фитнес-центра'
-    }
-    return render(request, 'clients/home.html', context)
+    })
 
 def register(request):
     """Регистрация нового пользователя"""
@@ -88,7 +104,6 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Добавляем пользователя в группу "Клиенты" (если она существует)
             try:
                 client_group = Group.objects.get(name='Клиенты')
                 user.groups.add(client_group)
@@ -99,6 +114,7 @@ def register(request):
             return redirect('home')
     else:
         form = UserRegisterForm()
+    
     return render(request, 'clients/register.html', {'form': form})
 
 def user_login(request):
@@ -112,6 +128,7 @@ def user_login(request):
             return redirect('home')
     else:
         form = AuthenticationForm()
+    
     return render(request, 'clients/login.html', {'form': form})
 
 @login_required
@@ -126,64 +143,111 @@ class EquipmentListView(LoginRequiredMixin, ListView):
     model = Equipment
     template_name = 'clients/equipment_list.html'
     context_object_name = 'equipment'
-    paginate_by = 10  # Пагинация по 10 элементов
+    paginate_by = 12
     
     def get_queryset(self):
-        return Equipment.objects.filter(status='available').order_by('name')
+        now = timezone.now()
+        rented_ids = Rental.objects.filter(
+            end_time__gt=now,
+            start_time__lt=now,
+            returned_at__isnull=True
+        ).values_list('equipment_id', flat=True)
+        
+        return Equipment.objects.exclude(
+            id__in=rented_ids
+        ).filter(status='available').order_by('name')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        now = timezone.now()
+        
+        context['current_rentals'] = {
+            r.equipment_id: r for r in 
+            Rental.objects.filter(
+                end_time__gt=now,
+                start_time__lt=now,
+                returned_at__isnull=True
+            ).select_related('equipment')
+        }
+        return context
 
 class MyRentalsView(LoginRequiredMixin, ListView):
     """Список аренд текущего пользователя"""
     model = Rental
     template_name = 'clients/my_rentals.html'
     context_object_name = 'rentals'
+    paginate_by = 10
     
     def get_queryset(self):
-        return Rental.objects.filter(client=self.request.user).order_by('-rented_at')
+        return Rental.objects.filter(
+            client=self.request.user
+        ).select_related('equipment') \
+         .order_by('-start_time')
 
 @login_required
 def rent_equipment(request, pk):
-    """Аренда оборудования"""
     equipment = get_object_or_404(Equipment, pk=pk)
     
-    # Проверка доступности оборудования
-    if equipment.status != 'available':
-        messages.error(request, 'Это оборудование недоступно для аренды')
-        return redirect('equipment_list')
+    if request.method == 'POST':
+        form = RentEquipmentForm(request.POST, equipment=equipment, user=request.user)
+        if form.is_valid():
+            try:
+                rental = form.save()  # Теперь equipment будет установлен
+                equipment.status = 'rented'
+                equipment.save()
+                
+                messages.success(request, f'Вы успешно арендовали {equipment.name}')
+                return redirect('my_rentals')
+            except Exception as e:
+                messages.error(request, f'Ошибка: {str(e)}')
+    else:
+        form = RentEquipmentForm(equipment=equipment)
     
-    # Проверка, не арендовал ли пользователь уже это оборудование
-    active_rental = Rental.objects.filter(
-        client=request.user,
-        equipment=equipment,
-        returned_at__isnull=True
-    ).exists()
+    return render(request, 'clients/rent_equipment.html', {
+        'form': form,
+        'equipment': equipment
+    })
+    equipment = get_object_or_404(Equipment, pk=pk)
     
-    if active_rental:
-        messages.warning(request, 'Вы уже арендовали это оборудование')
-        return redirect('my_rentals')
+    if request.method == 'POST':
+        form = RentEquipmentForm(
+            request.POST,
+            equipment=equipment,  # Передаем оборудование
+            user=request.user     # Передаем пользователя
+        )
+        if form.is_valid():
+            try:
+                rental = form.save()
+                equipment.status = 'rented'
+                equipment.save()
+                
+                messages.success(
+                    request,
+                    f'Вы успешно арендовали {equipment.name} '
+                    f'с {rental.start_time.strftime("%d.%m.%Y %H:%M")} '
+                    f'до {rental.end_time.strftime("%d.%m.%Y %H:%M")}'
+                )
+                return redirect('my_rentals')
+            except Exception as e:
+                messages.error(request, f'Ошибка при создании аренды: {str(e)}')
+    else:
+        form = RentEquipmentForm(equipment=equipment)
     
-    # Создание аренды
-    equipment.status = 'rented'
-    equipment.save()
-    
-    Rental.objects.create(
-        client=request.user,
-        equipment=equipment,
-        notes=f"Аренда {equipment.name} через веб-интерфейс"
-    )
-    
-    messages.success(request, f'Вы успешно арендовали {equipment.name}')
-    return redirect('my_rentals')
+    return render(request, 'clients/rent_equipment.html', {
+        'form': form,
+        'equipment': equipment
+    })
 
 @login_required
 def return_equipment(request, pk):
     """Возврат оборудования"""
-    rental = get_object_or_404(Rental, pk=pk, client=request.user)
+    rental = get_object_or_404(
+        Rental, 
+        pk=pk, 
+        client=request.user,
+        returned_at__isnull=True
+    )
     
-    if rental.returned_at:
-        messages.warning(request, 'Это оборудование уже было возвращено')
-        return redirect('my_rentals')
-    
-    # Обновление данных о возврате
     rental.returned_at = timezone.now()
     rental.save()
     
@@ -191,5 +255,9 @@ def return_equipment(request, pk):
     equipment.status = 'available'
     equipment.save()
     
-    messages.success(request, f'Вы вернули {equipment.name}')
+    messages.success(
+        request,
+        f'Вы вернули {equipment.name}. '
+        f'Аренда длилась {rental.duration // 60} ч. {rental.duration % 60} мин.'
+    )
     return redirect('my_rentals')

@@ -1,4 +1,5 @@
 {% extends 'clients/base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container mt-4">
@@ -6,34 +7,119 @@
     
     {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         {% endfor %}
     {% endif %}
     
     <div class="row">
         {% for item in equipment %}
         <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ item.name }}</h5>
-                    <p class="card-text">{{ item.description }}</p>
-                    <span class="badge bg-success">
-                        {{ item.get_status_display }}
-                    </span>
+                    <p class="card-text text-muted mb-3">{{ item.description|default:"Описание отсутствует" }}</p>
+                    
+                    <!-- Улучшенный блок статуса -->
+                    {% if item.id in current_rentals %}
+                        {% with rental=current_rentals|get_item:item.id %}
+                        <div class="mt-auto">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-{% if rental.is_overdue %}danger{% else %}warning{% endif %} text-dark me-2">
+                                    <i class="fas fa-{% if rental.is_overdue %}exclamation-triangle{% else %}clock{% endif %} me-1"></i>
+                                    {% if rental.is_overdue %}Просрочено{% else %}Занято{% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    До {{ rental.end_time|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-{% if rental.is_overdue %}danger{% else %}warning{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ rental.progress_percent|floatformat:0 }}%"
+                                     aria-valuenow="{{ rental.progress_percent|floatformat:0 }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            {% if rental.is_overdue %}
+                            <small class="text-danger mt-1 d-block">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Просрочено на {{ rental.overdue_time|floatformat:0 }} ч.
+                            </small>
+                            {% endif %}
+                        </div>
+                        {% endwith %}
+                    {% else %}
+                        <div class="mt-auto">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i> Доступно
+                            </span>
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="card-footer">
-                    <a href="{% url 'rent_equipment' item.pk %}" 
-                       class="btn btn-primary">
-                        Арендовать
-                    </a>
+                
+                <div class="card-footer bg-transparent">
+                    {% if item.id in current_rentals %}
+                        <button class="btn btn-outline-secondary w-100" disabled>
+                            <i class="fas fa-lock me-1"></i> Недоступно для аренды
+                        </button>
+                    {% else %}
+                        <a href="{% url 'rent_equipment' item.pk %}" 
+                           class="btn btn-primary w-100">
+                            <i class="fas fa-calendar-plus me-2"></i> Забронировать
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="alert alert-info">Нет доступного оборудования</div>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-dumbbell fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Нет доступного оборудования</h5>
+                    {% if user.is_trainer %}
+                    <a href="{% url 'trainer_equipment' %}" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-list me-1"></i> Посмотреть весь инвентарь
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% endfor %}
     </div>
+    
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}

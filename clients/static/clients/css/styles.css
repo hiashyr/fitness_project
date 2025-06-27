@@ -163,3 +163,14 @@ main {
 .page-link:hover {
     color: var(--dark-blue);
 }
+
+.progress-bar-rental {
+    transition: width 0.5s ease;
+    height: 6px;
+}
+
+.rental-status-badge {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+}

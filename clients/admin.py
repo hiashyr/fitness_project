@@ -38,19 +38,21 @@ class EquipmentAdmin(admin.ModelAdmin):
 
 @admin.register(Rental)
 class RentalAdmin(admin.ModelAdmin):
-    list_display = ('client', 'equipment', 'rented_at', 'returned_at', 'status_info', 'duration')
-    list_filter = ('equipment__status', 'rented_at', 'client__groups')
+    list_display = ('client', 'equipment', 'start_time', 'end_time', 'returned_at', 'status_info', 'duration')
+    list_filter = ('equipment__status', 'start_time', 'client__groups')
     raw_id_fields = ('client', 'equipment')
-    date_hierarchy = 'rented_at'
+    date_hierarchy = 'start_time'
     search_fields = ('client__username', 'equipment__name')
     list_select_related = ('client', 'equipment')
     
     def status_info(self, obj):
-        return obj.equipment.get_status_display()
-    status_info.short_description = 'Текущий статус'
+        if obj.returned_at:
+            return 'Возвращено'
+        return 'Активна' if obj.end_time > timezone.now() else 'Просрочена'
+    status_info.short_description = 'Статус аренды'
     
     def duration(self, obj):
         if obj.returned_at:
-            return obj.returned_at - obj.rented_at
-        return timezone.now() - obj.rented_at
-    duration.short_description = 'Длительность аренды'
+            return obj.returned_at - obj.start_time
+        return (timezone.now() - obj.start_time) if obj.end_time > timezone.now() else (obj.end_time - obj.start_time)
+    duration.short_description = 'Длительность'

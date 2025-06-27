@@ -1,0 +1,146 @@
+{% extends 'clients/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Аренда {{ equipment.name }}
+                </h4>
+                <span class="badge bg-light text-dark">
+                    <i class="fas fa-clock me-1"></i>Текущее время: {% now "d.m.Y H:i" %}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" id="rental-form" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Начало аренды</label>
+                        <input type="datetime-local" 
+                               name="start_time" 
+                               id="id_start_time" 
+                               class="form-control"
+                               value="{{ form.start_time.value|default:'' }}"
+                               step="300">
+                        {% if form.start_time.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.start_time.errors|join:", " }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Конец аренды</label>
+                        <input type="datetime-local" 
+                               name="end_time" 
+                               id="id_end_time" 
+                               class="form-control"
+                               value="{{ form.end_time.value|default:'' }}"
+                               step="300">
+                        {% if form.end_time.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.end_time.errors|join:", " }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="alert alert-info d-flex align-items-center">
+                    <i class="fas fa-info-circle me-3 fs-4"></i>
+                    <div>
+                        <h5 class="alert-heading mb-2">Условия аренды</h5>
+                        <ul class="mb-0">
+                            <li>Минимальное время аренды - <strong>1 час</strong></li>
+                            <li>Максимальное время аренды - <strong>24 часа</strong></li>
+                            <li>Выбор времени с шагом <strong>5 минут</strong></li>
+                            <li>Начало аренды не ранее <strong>{% now "d.m.Y H:i" %}</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <a href="{% url 'equipment_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к списку
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4" id="submit-btn">
+                        <i class="fas fa-check-circle me-2"></i>Подтвердить аренду
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startInput = document.getElementById('id_start_time');
+    const endInput = document.getElementById('id_end_time');
+    const form = document.getElementById('rental-form');
+    
+    // Установка минимального времени
+    const now = new Date();
+    const minStartTime = now.toISOString().slice(0, 16);
+    startInput.min = minStartTime;
+    
+    // Автоматическая установка конечного времени
+    startInput.addEventListener('change', function() {
+        if (startInput.value) {
+            const startTime = new Date(startInput.value);
+            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 час
+            endInput.value = endTime.toISOString().slice(0, 16);
+            endInput.min = endTime.toISOString().slice(0, 16);
+        }
+    });
+    
+    // Базовая валидация перед отправкой
+    form.addEventListener('submit', function(e) {
+        const start = new Date(startInput.value);
+        const end = new Date(endInput.value);
+        
+        if (end <= start) {
+            alert('Время окончания должно быть позже времени начала');
+            e.preventDefault();
+            return false;
+        }
+        
+        const durationHours = (end - start) / (1000 * 60 * 60);
+        if (durationHours < 1) {
+            alert('Минимальное время аренды - 1 час');
+            e.preventDefault();
+            return false;
+        }
+        
+        if (durationHours > 24) {
+            alert('Максимальное время аренды - 24 часа');
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+
+<style>
+    #id_start_time, #id_end_time {
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        width: 100%;
+    }
+    .alert-info {
+        background-color: #f0f7ff;
+        border-color: #cce5ff;
+    }
+</style>
+{% endblock %}
