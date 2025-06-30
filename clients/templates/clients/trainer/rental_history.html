@@ -29,7 +29,6 @@
                             <th>Дата аренды</th>
                             <th>Дата возврата</th>
                             <th>Статус</th>
-                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,7 +36,7 @@
                         <tr>
                             <td>{{ rental.client.username }}</td>
                             <td>{{ rental.equipment.name }}</td>
-                            <td>{{ rental.rented_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ rental.start_time|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if rental.returned_at %}
                                     {{ rental.returned_at|date:"d.m.Y H:i" }}
@@ -50,15 +49,10 @@
                                     {% if rental.returned_at %}Завершена{% else %}Активна{% endif %}
                                 </span>
                             </td>
-                            <td>
-                                <a href="#" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Детали">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-4">Нет данных об арендах</td>
+                            <td colspan="5" class="text-center py-4">Нет данных об арендах</td>
                         </tr>
                         {% endfor %}
                     </tbody>

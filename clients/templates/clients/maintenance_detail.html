@@ -1,0 +1,28 @@
+{% extends 'clients/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Обслуживание: {{ maintenance.equipment.name }}</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Статус</dt>
+                <dd class="col-sm-8">{{ maintenance.get_status_display }}</dd>
+                <dt class="col-sm-4">Начало обслуживания</dt>
+                <dd class="col-sm-8">{{ maintenance.start_date|date:'d.m.Y H:i' }}</dd>
+                <dt class="col-sm-4">Окончание обслуживания</dt>
+                <dd class="col-sm-8">{% if maintenance.end_date %}{{ maintenance.end_date|date:'d.m.Y H:i' }}{% else %}-{% endif %}</dd>
+                <dt class="col-sm-4">Исполнитель</dt>
+                <dd class="col-sm-8">{{ maintenance.performed_by|default:'-' }}</dd>
+                <dt class="col-sm-4">Описание работ</dt>
+                <dd class="col-sm-8">{{ maintenance.description|default:'-' }}</dd>
+            </dl>
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'maintenance_edit' maintenance.pk %}" class="btn btn-secondary me-2">Редактировать</a>
+                <a href="{% url 'maintenance_list' %}" class="btn btn-outline-primary">К списку</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

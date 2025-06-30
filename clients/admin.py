@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Equipment, Rental, User
+from .models import Equipment, Rental, User, Maintenance
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
@@ -56,3 +56,5 @@ class RentalAdmin(admin.ModelAdmin):
             return obj.returned_at - obj.start_time
         return (timezone.now() - obj.start_time) if obj.end_time > timezone.now() else (obj.end_time - obj.start_time)
     duration.short_description = 'Длительность'
+
+admin.site.register(Maintenance)

@@ -1,8 +1,9 @@
 {% extends 'clients/base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Весь инвентарь</h2>
+    <h2>{{ title }}</h2>
     
     <div class="mb-3">
         <a href="{% url 'trainer_rentals' %}" class="btn btn-info">
@@ -31,13 +32,13 @@
                     </td>
                     <td>{{ item.added_at|date:"d.m.Y" }}</td>
                     <td>
-                        {% if item.status == 'rented' %}
-                            {% with rental=item.rental_set.last %}
-                                {{ rental.client.username }} (с {{ rental.rented_at|date:"d.m.Y" }})
-                            {% endwith %}
-                        {% else %}
-                            -
-                        {% endif %}
+                        {% with rental=current_rentals|get_item:item.id %}
+                            {% if rental %}
+                                {{ rental.client.username }} (с {{ rental.start_time|date:"d.m.Y H:i" }})
+                            {% else %}
+                                -
+                            {% endif %}
+                        {% endwith %}
                     </td>
                 </tr>
                 {% endfor %}

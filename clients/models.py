@@ -177,3 +177,26 @@ class Rental(models.Model):
             end_time__gte=now,
             returned_at__isnull=True
         ).first()
+
+class Maintenance(models.Model):
+    STATUS_CHOICES = [
+        ('planned', 'Запланировано'),
+        ('in_progress', 'В процессе'),
+        ('completed', 'Завершено'),
+    ]
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='maintenances', verbose_name='Оборудование')
+    start_date = models.DateTimeField(verbose_name='Начало обслуживания')
+    end_date = models.DateTimeField(null=True, blank=True, verbose_name='Окончание обслуживания')
+    description = models.TextField(blank=True, verbose_name='Описание работ')
+    performed_by = models.CharField(max_length=100, blank=True, verbose_name='Исполнитель')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planned', verbose_name='Статус')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
+
+    class Meta:
+        verbose_name = 'Обслуживание'
+        verbose_name_plural = 'Обслуживания'
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return f"{self.equipment.name} ({self.get_status_display()}) с {self.start_date:%d.%m.%Y}"

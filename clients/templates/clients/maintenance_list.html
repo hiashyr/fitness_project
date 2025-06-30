@@ -1,0 +1,40 @@
+{% extends 'clients/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Обслуживания оборудования</h2>
+        <a href="{% url 'maintenance_create' %}" class="btn btn-primary">Добавить обслуживание</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Оборудование</th>
+                    <th>Статус</th>
+                    <th>Начало</th>
+                    <th>Окончание</th>
+                    <th>Исполнитель</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in maintenances %}
+                <tr>
+                    <td>{{ m.equipment.name }}</td>
+                    <td>{{ m.get_status_display }}</td>
+                    <td>{{ m.start_date|date:'d.m.Y H:i' }}</td>
+                    <td>{% if m.end_date %}{{ m.end_date|date:'d.m.Y H:i' }}{% else %}-{% endif %}</td>
+                    <td>{{ m.performed_by|default:'-' }}</td>
+                    <td>
+                        <a href="{% url 'maintenance_detail' m.pk %}" class="btn btn-sm btn-info">Просмотр</a>
+                        <a href="{% url 'maintenance_edit' m.pk %}" class="btn btn-sm btn-secondary">Редактировать</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">Нет записей об обслуживании</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

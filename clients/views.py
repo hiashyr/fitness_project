@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
@@ -11,8 +11,8 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from datetime import timedelta
 
-from .models import Equipment, Rental
-from .forms import UserRegisterForm, RentEquipmentForm
+from .models import Equipment, Rental, Maintenance
+from .forms import UserRegisterForm, RentEquipmentForm, UserLoginForm, MaintenanceForm
 
 def trainer_check(user):
     """Проверка, является ли пользователь тренером"""
@@ -21,7 +21,7 @@ def trainer_check(user):
 class AllEquipmentView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """Просмотр всего оборудования для тренеров"""
     model = Equipment
-    template_name = 'clients/trainer/all_equipment.html'
+    template_name = 'clients/all_equipment.html'
     context_object_name = 'equipment'
     paginate_by = 20
 
@@ -32,6 +32,31 @@ class AllEquipmentView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return Equipment.objects.all() \
             .select_related() \
             .order_by('status', 'name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Весь инвентарь'
+        context['is_trainer'] = True
+        # Добавляем текущие или ближайшие будущие аренды для каждого оборудования
+        now = timezone.now()
+        current_rentals = {}
+        for eq in context['equipment']:
+            # Сначала ищем текущую аренду
+            rental = eq.rentals.filter(
+                start_time__lte=now,
+                end_time__gte=now,
+                returned_at__isnull=True
+            ).select_related('client').first()
+            # Если нет текущей, ищем ближайшую будущую
+            if not rental:
+                rental = eq.rentals.filter(
+                    start_time__gt=now,
+                    returned_at__isnull=True
+                ).order_by('start_time').select_related('client').first()
+            current_rentals[eq.id] = rental
+        context['current_rentals'] = current_rentals
+        context['now'] = now
+        return context
 
 class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """История аренд для тренеров"""
@@ -120,14 +145,14 @@ def register(request):
 def user_login(request):
     """Авторизация пользователя"""
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = UserLoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, f'Добро пожаловать, {user.username}!')
             return redirect('home')
     else:
-        form = AuthenticationForm()
+        form = UserLoginForm()
     
     return render(request, 'clients/login.html', {'form': form})
 
@@ -207,36 +232,6 @@ def rent_equipment(request, pk):
         'form': form,
         'equipment': equipment
     })
-    equipment = get_object_or_404(Equipment, pk=pk)
-    
-    if request.method == 'POST':
-        form = RentEquipmentForm(
-            request.POST,
-            equipment=equipment,  # Передаем оборудование
-            user=request.user     # Передаем пользователя
-        )
-        if form.is_valid():
-            try:
-                rental = form.save()
-                equipment.status = 'rented'
-                equipment.save()
-                
-                messages.success(
-                    request,
-                    f'Вы успешно арендовали {equipment.name} '
-                    f'с {rental.start_time.strftime("%d.%m.%Y %H:%M")} '
-                    f'до {rental.end_time.strftime("%d.%m.%Y %H:%M")}'
-                )
-                return redirect('my_rentals')
-            except Exception as e:
-                messages.error(request, f'Ошибка при создании аренды: {str(e)}')
-    else:
-        form = RentEquipmentForm(equipment=equipment)
-    
-    return render(request, 'clients/rent_equipment.html', {
-        'form': form,
-        'equipment': equipment
-    })
 
 @login_required
 def return_equipment(request, pk):
@@ -261,3 +256,43 @@ def return_equipment(request, pk):
         f'Аренда длилась {rental.duration // 60} ч. {rental.duration % 60} мин.'
     )
     return redirect('my_rentals')
+
+# --- Обслуживание оборудования ---
+@login_required
+@user_passes_test(lambda u: u.is_trainer())
+def maintenance_list(request):
+    maintenances = Maintenance.objects.select_related('equipment').order_by('-start_date')
+    return render(request, 'clients/maintenance_list.html', {'maintenances': maintenances})
+
+@login_required
+@user_passes_test(lambda u: u.is_trainer())
+def maintenance_create(request):
+    if request.method == 'POST':
+        form = MaintenanceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Обслуживание добавлено!')
+            return redirect('maintenance_list')
+    else:
+        form = MaintenanceForm()
+    return render(request, 'clients/maintenance_form.html', {'form': form, 'title': 'Новое обслуживание'})
+
+@login_required
+@user_passes_test(lambda u: u.is_trainer())
+def maintenance_edit(request, pk):
+    maintenance = get_object_or_404(Maintenance, pk=pk)
+    if request.method == 'POST':
+        form = MaintenanceForm(request.POST, instance=maintenance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Обслуживание обновлено!')
+            return redirect('maintenance_list')
+    else:
+        form = MaintenanceForm(instance=maintenance)
+    return render(request, 'clients/maintenance_form.html', {'form': form, 'title': 'Редактировать обслуживание'})
+
+@login_required
+@user_passes_test(lambda u: u.is_trainer())
+def maintenance_detail(request, pk):
+    maintenance = get_object_or_404(Maintenance, pk=pk)
+    return render(request, 'clients/maintenance_detail.html', {'maintenance': maintenance})

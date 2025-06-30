@@ -29,12 +29,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Начало аренды</label>
-                        <input type="datetime-local" 
-                               name="start_time" 
-                               id="id_start_time" 
-                               class="form-control"
-                               value="{{ form.start_time.value|default:'' }}"
-                               step="300">
+                        {{ form.start_time }}
                         {% if form.start_time.errors %}
                         <div class="text-danger small mt-1">
                             {{ form.start_time.errors|join:", " }}
@@ -42,16 +37,11 @@
                         {% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">Конец аренды</label>
-                        <input type="datetime-local" 
-                               name="end_time" 
-                               id="id_end_time" 
-                               class="form-control"
-                               value="{{ form.end_time.value|default:'' }}"
-                               step="300">
-                        {% if form.end_time.errors %}
+                        <label class="form-label fw-bold">На сколько часов</label>
+                        {{ form.duration }}
+                        {% if form.duration.errors %}
                         <div class="text-danger small mt-1">
-                            {{ form.end_time.errors|join:", " }}
+                            {{ form.duration.errors|join:", " }}
                         </div>
                         {% endif %}
                     </div>
@@ -64,7 +54,7 @@
                         <ul class="mb-0">
                             <li>Минимальное время аренды - <strong>1 час</strong></li>
                             <li>Максимальное время аренды - <strong>24 часа</strong></li>
-                            <li>Выбор времени с шагом <strong>5 минут</strong></li>
+                            <li>Выберите только дату и время начала, а также длительность аренды</li>
                             <li>Начало аренды не ранее <strong>{% now "d.m.Y H:i" %}</strong></li>
                         </ul>
                     </div>
@@ -84,51 +74,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const startInput = document.getElementById('id_start_time');
-    const endInput = document.getElementById('id_end_time');
-    const form = document.getElementById('rental-form');
-    
-    // Установка минимального времени
-    const now = new Date();
-    const minStartTime = now.toISOString().slice(0, 16);
-    startInput.min = minStartTime;
-    
-    // Автоматическая установка конечного времени
-    startInput.addEventListener('change', function() {
-        if (startInput.value) {
-            const startTime = new Date(startInput.value);
-            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 час
-            endInput.value = endTime.toISOString().slice(0, 16);
-            endInput.min = endTime.toISOString().slice(0, 16);
-        }
-    });
-    
-    // Базовая валидация перед отправкой
-    form.addEventListener('submit', function(e) {
-        const start = new Date(startInput.value);
-        const end = new Date(endInput.value);
-        
-        if (end <= start) {
-            alert('Время окончания должно быть позже времени начала');
-            e.preventDefault();
-            return false;
-        }
-        
-        const durationHours = (end - start) / (1000 * 60 * 60);
-        if (durationHours < 1) {
-            alert('Минимальное время аренды - 1 час');
-            e.preventDefault();
-            return false;
-        }
-        
-        if (durationHours > 24) {
-            alert('Максимальное время аренды - 24 часа');
-            e.preventDefault();
-            return false;
-        }
-    });
-});
+// Удалить весь JS, связанный с end_time и duration, так как теперь всё делается формой
 </script>
 
 <style>

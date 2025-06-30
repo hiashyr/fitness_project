@@ -3,7 +3,8 @@ from .views import (
     home, register, user_login, user_logout,
     EquipmentListView, MyRentalsView,
     rent_equipment, return_equipment,
-    AllEquipmentView, RentalHistoryView
+    AllEquipmentView, RentalHistoryView,
+    maintenance_list, maintenance_create, maintenance_edit, maintenance_detail
 )
 
 urlpatterns = [
@@ -19,4 +20,8 @@ urlpatterns = [
     path('return/<int:pk>/', return_equipment, name='return_equipment'),
     path('trainer/equipment/', AllEquipmentView.as_view(), name='trainer_equipment'),
     path('trainer/rentals/', RentalHistoryView.as_view(), name='trainer_rentals'),
+    path('maintenance/', maintenance_list, name='maintenance_list'),
+    path('maintenance/new/', maintenance_create, name='maintenance_create'),
+    path('maintenance/<int:pk>/edit/', maintenance_edit, name='maintenance_edit'),
+    path('maintenance/<int:pk>/', maintenance_detail, name='maintenance_detail'),
 ]
