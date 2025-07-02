@@ -8,31 +8,59 @@
 body {
     font-family: 'Roboto', sans-serif;
     color: #333;
-    background-color: #f8f9fa;
+    background-color: #E9EAE4;
 }
 
 /* Навигационная панель */
 .navbar {
-    padding: 1rem 0;
+    padding: 1.1rem 0;
+    font-size: 1.10rem;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%) !important;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    margin-right: 2.5rem;
 }
 
-.nav-link {
+.navbar .navbar-brand, .navbar .navbar-brand span {
+    color: #fff !important;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.navbar .navbar-nav {
+    gap: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.navbar .nav-link, .navbar .dropdown-item {
+    color: #fff !important;
     font-weight: 500;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
+    transition: color 0.2s, background 0.2s;
+    margin-right: 0.5rem;
 }
 
-.nav-link:hover {
-    color: var(--primary-blue) !important;
+.navbar .nav-link.active, .navbar .nav-link:hover, .navbar .dropdown-item:hover {
+    color: #1b1f2c !important;
+    background: rgba(233,234,228,0.15);
+    border-radius: 1em;
 }
 
-.nav-link.active {
-    color: var(--primary-blue) !important;
+.navbar .btn-primary, .navbar .btn {
+    background: #fff;
+    color: #1caac0;
+    border: none;
+    font-weight: 600;
+    border-radius: 2em;
+    transition: background 0.2s, color 0.2s;
+}
+
+.navbar .btn-primary:hover, .navbar .btn:hover {
+    background: #1caac0;
+    color: #fff;
 }
 
 /* Кнопки */
@@ -48,13 +76,17 @@ body {
 }
 
 .btn-outline-primary {
-    color: var(--primary-blue);
-    border-color: var(--primary-blue);
+    color: #1caac0;
+    border-color: #1caac0;
+    background: #fff;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s, border 0.2s;
 }
 
-.btn-outline-primary:hover {
-    background-color: var(--primary-blue);
-    color: white;
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+    background: #1caac0;
+    color: #fff;
+    border-color: #1caac0;
 }
 
 /* Основное содержимое */
@@ -64,10 +96,11 @@ main {
 
 /* Карточки */
 .card {
+    background: #5fc0cc;
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(31, 170, 192, 0.10);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .card:hover {
@@ -75,19 +108,50 @@ main {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Подвал */
-.footer {
-    background-color: #212529;
+.card h3.text-primary {
+    color: white !important;
 }
 
-.footer a {
-    color: var(--light-blue);
-    text-decoration: none;
-    transition: color 0.3s ease;
+.card .text-muted {
+    color: #1b1f2c !important;
+}
+
+/* Подвал */
+.footer {
+    background: linear-gradient(90deg, #1caac0 0%, #5fc0cc 100%) !important;
+    color: #fff !important;
+    border-top: 4px solid #E9EAE4;
+}
+
+.footer h5 {
+    color: #fff !important;
+    font-weight: 700;
+}
+
+.footer a, .footer li, .footer p {
+    color: #fff !important;
+    transition: color 0.2s;
 }
 
 .footer a:hover {
-    color: white;
+    color: #1b1f2c !important;
+    text-decoration: underline;
+}
+
+.footer .row {
+    margin-bottom: 0;
+}
+
+.footer .fa {
+    color: #fff !important;
+}
+
+.footer hr {
+    border-color: #E9EAE4;
+}
+
+.footer .text-center {
+    color: #fff !important;
 }
 
 /* Сообщения */
@@ -103,9 +167,22 @@ main {
 
 /* Hero секция */
 .hero-section {
-    background: linear-gradient(135deg, #f5f9ff 0%, #e6f2ff 100%);
+    background: linear-gradient(135deg, #5fc0cc 0%, #1caac0 100%);
+    color: #fff;
     padding: 5rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+    border-radius: 10px;
+}
+
+.hero-section .display-4,
+.hero-section .lead {
+    color: #fff;
+    font-weight: 400;
+}
+
+.hero-section .btn-primary,
+.hero-section .btn-outline-primary {
+    box-shadow: 0 4px 16px rgba(31, 170, 192, 0.15);
 }
 
 /* Адаптивность */
@@ -119,6 +196,14 @@ main {
     }
 }
 
+@media (max-width: 992px) {
+    .navbar .navbar-brand {
+        margin-right: 1.25rem;
+    }
+    .navbar .navbar-nav {
+        gap: 0.75rem;
+    }
+}
 
 /* Стили для таблицы истории аренд */
 .table-hover tbody tr:hover {
@@ -173,4 +258,85 @@ main {
     font-size: 0.85rem;
     padding: 5px 10px;
     border-radius: 4px;
+}
+
+/* --- Мои аренды --- */
+.rental-table th {
+    background: #E9EAE4;
+    color: #1b1f2c;
+    font-weight: 600;
+    /* border-bottom: 2px solid #5fc0cc; */
+}
+.rental-table tbody tr:nth-child(even) {
+    background: #f7fafc;
+}
+.rental-table td, .rental-table th {
+    vertical-align: middle;
+}
+.rental-table .badge-status {
+    font-size: 1em;
+    padding: 0.5em 1em;
+    border-radius: 1.5em;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    min-width: 110px;
+    display: inline-block;
+    text-align: center;
+}
+.rental-table .badge-status.active {
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.10);
+    min-width: 120px;
+}
+.rental-table .badge-status.completed {
+    background: #E9EAE4 !important;
+    color: #1caac0 !important;
+    border: 1px solid #1caac0;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.07);
+    min-width: 110px;
+}
+.progress-bar-rental {
+    transition: width 0.5s ease;
+    height: 6px;
+    border-radius: 3px;
+    background: #5fc0cc;
+}
+.rental-table .btn-primary {
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 2em;
+    transition: background 0.2s, color 0.2s;
+}
+.rental-table .btn-primary:hover {
+    background: #1caac0;
+    color: #fff;
+}
+.rental-table .fa-dumbbell {
+    color: #1caac0;
+}
+.rental-table .fa-box-open {
+    color: #5fc0cc;
+}
+
+/* Стили для выпадающего меню навигации */
+.navbar .dropdown-menu {
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%) !important;
+    border: none;
+}
+
+.navbar .dropdown-item {
+    color: #fff !important;
+}
+
+.navbar .dropdown-item:hover, .navbar .dropdown-item:focus {
+    color: #1caac0 !important;
+    background: #fff !important;
+}
+
+.rental-table {
+    border: none !important;
+    box-shadow: none !important;
 }

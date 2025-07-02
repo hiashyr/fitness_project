@@ -1,23 +1,39 @@
 {% extends 'clients/base.html' %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Мои аренды</h2>
-    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="mb-0 text-primary fw-bold">Мои аренды</h2>
+        <div class="d-flex gap-2 align-items-center">
+            <form method="get" class="d-flex align-items-center me-2">
+                <select name="status" class="form-select me-2" onchange="this.form.submit()">
+                    <option value="" {% if not status %}selected{% endif %}>Все</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Активные</option>
+                    <option value="returned" {% if status == 'returned' %}selected{% endif %}>Завершённые</option>
+                </select>
+            </form>
+            <a href="?export=csv{% if status %}&status={{ status }}{% endif %}" class="btn btn-outline-primary">
+                <i class="fas fa-download me-1"></i> Экспорт
+            </a>
+        </div>
+    </div>
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table rental-table align-middle">
             <thead>
                 <tr>
-                    <th>Оборудование</th>
-                    <th>Дата аренды</th>
-                    <th>Дата возврата</th>
-                    <th>Действия</th>
+                    <th><i class="fas fa-dumbbell me-1 text-primary"></i>Оборудование</th>
+                    <th><i class="fas fa-calendar-alt me-1 text-primary"></i>Дата аренды</th>
+                    <th><i class="fas fa-calendar-check me-1 text-primary"></i>Дата возврата</th>
+                    <th><i class="fas fa-hourglass-half me-1 text-primary"></i>Длительность</th>
+                    <th class="text-center"><i class="fas fa-info-circle me-1 text-primary"></i>Статус</th>
+                    <th class="text-center"><i class="fas fa-cogs me-1 text-primary"></i>Действия</th>
                 </tr>
             </thead>
             <tbody>
-                {% for rental in object_list %}
+                {% for rental in rentals %}
                 <tr>
-                    <td>{{ rental.equipment.name }}</td>
+                    <td><i class="fas fa-dumbbell me-2 text-primary"></i>{{ rental.equipment.name }}</td>
                     <td>{{ rental.start_time|date:"d.m.Y H:i" }}</td>
                     <td>
                         {% if rental.returned_at %}
@@ -27,21 +43,50 @@
                         {% endif %}
                     </td>
                     <td>
+                        {{ rental.duration|duration_hm }}
                         {% if not rental.returned_at %}
-                        <a href="{% url 'return_equipment' rental.pk %}" 
-                           class="btn btn-sm btn-warning">
-                            Вернуть
-                        </a>
+                            <span class="text-muted ms-1" data-bs-toggle="tooltip" title="Общая длительность аренды">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if rental.returned_at %}
+                            <span class="badge badge-status completed">Завершена</span>
+                        {% else %}
+                            <span class="badge badge-status active">Активна</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if not rental.returned_at %}
+                            <a href="{% url 'return_equipment' rental.pk %}"
+                               class="btn btn-sm btn-primary px-3 fw-bold" data-bs-toggle="tooltip" title="Вернуть оборудование">
+                                Вернуть
+                            </a>
+                        {% else %}
+                            <i class="fas fa-ban text-muted fs-4"></i>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">У вас нет активных аренд</td>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-box-open fa-3x text-primary mb-2"></i>
+                        </div>
+                        <div class="fs-5 mb-2">У вас нет аренд. Начните с аренды оборудования!</div>
+                        <a href="{% url 'equipment_list' %}" class="btn btn-outline-primary">Арендовать оборудование</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
 {% endblock %}

@@ -197,17 +197,54 @@ class EquipmentListView(LoginRequiredMixin, ListView):
         return context
 
 class MyRentalsView(LoginRequiredMixin, ListView):
-    """Список аренд текущего пользователя"""
+    """Список аренд текущего пользователя с фильтрацией и экспортом"""
     model = Rental
     template_name = 'clients/my_rentals.html'
     context_object_name = 'rentals'
     paginate_by = 10
-    
+
     def get_queryset(self):
-        return Rental.objects.filter(
-            client=self.request.user
-        ).select_related('equipment') \
-         .order_by('-start_time')
+        qs = Rental.objects.filter(client=self.request.user).select_related('equipment').order_by('-start_time')
+        status = self.request.GET.get('status')
+        if status == 'active':
+            qs = qs.filter(returned_at__isnull=True)
+        elif status == 'returned':
+            qs = qs.filter(returned_at__isnull=False)
+        return qs
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('export') == 'csv':
+            return self.export_to_csv()
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status'] = self.request.GET.get('status', '')
+        return context
+
+    def export_to_csv(self):
+        import csv
+        from django.http import HttpResponse
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="my_rentals.csv"'
+        writer = csv.writer(response)
+        writer.writerow([
+            'Оборудование', 'Начало аренды', 'Конец аренды', 'Возвращено', 'Статус', 'Длительность (ч:м)'
+        ])
+        for rental in self.get_queryset():
+            status = 'Завершена' if rental.returned_at else 'Активна'
+            duration = rental.duration
+            hours = int(duration // 60)
+            minutes = int(duration % 60)
+            writer.writerow([
+                rental.equipment.name,
+                rental.start_time.strftime('%d.%m.%Y %H:%M'),
+                rental.end_time.strftime('%d.%m.%Y %H:%M'),
+                rental.returned_at.strftime('%d.%m.%Y %H:%M') if rental.returned_at else '',
+                status,
+                f"{hours} ч. {minutes} мин."
+            ])
+        return response
 
 @login_required
 def rent_equipment(request, pk):
