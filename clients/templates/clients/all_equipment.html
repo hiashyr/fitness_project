@@ -3,22 +3,49 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>{{ title }}</h2>
+    <h2 class="equipment-title">
+        <svg class="icon-title" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#5fc0cc"/><path d="M8 12l2.5 2.5L16 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {{ title }}
+    </h2>
     
-    <div class="mb-3">
+    <div class="d-flex flex-wrap align-items-center mb-3 gap-2">
         <a href="{% url 'trainer_rentals' %}" class="btn btn-info">
+            <svg class="icon-btn" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="14" height="10" rx="2" fill="#fff"/><path d="M2 7h14" stroke="#5fc0cc" stroke-width="2"/></svg>
             История аренд
         </a>
+        <form method="get" class="d-flex flex-wrap gap-2 ms-auto equipment-filter-form">
+            <input type="text" name="search" class="form-control" placeholder="Поиск по названию" value="{{ request.GET.search|default:'' }}" />
+            <select name="status" class="form-select">
+                <option value="">Все статусы</option>
+                <option value="available" {% if request.GET.status == 'available' %}selected{% endif %}>В наличии</option>
+                <option value="rented" {% if request.GET.status == 'rented' %}selected{% endif %}>В аренде</option>
+                <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>На обслуживании</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Фильтровать</button>
+        </form>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
+    <div class="table-responsive equipment-table-wrapper">
+        {% if equipment %}
+        <table class="table equipment-table">
             <thead>
                 <tr>
-                    <th>Название</th>
-                    <th>Статус</th>
-                    <th>Дата добавления</th>
-                    <th>Текущая аренда</th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" rx="4" fill="#1caac0"/><path d="M4 8h8" stroke="#fff" stroke-width="2"/></svg>
+                        Название
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7" fill="#5fc0cc"/><path d="M8 4v4l2 2" stroke="#fff" stroke-width="2"/></svg>
+                        Статус
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12" height="12" rx="3" fill="#E9EAE4" stroke="#1b1f2c" stroke-width="1.5"/><path d="M5 5h6v6H5z" fill="#5fc0cc"/></svg>
+                        Дата добавления
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" rx="8" fill="#1b1f2c"/><path d="M5 8h6" stroke="#fff" stroke-width="2"/></svg>
+                        Текущая аренда
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -26,9 +53,22 @@
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>
-                        <span class="badge bg-{% if item.status == 'available' %}success{% elif item.status == 'rented' %}warning{% else %}secondary{% endif %}">
-                            {{ item.get_status_display }}
-                        </span>
+                        {% if item.status == 'available' %}
+                            <span class="badge badge-status available">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="6" fill="#5fc0cc"/></svg>
+                                {{ item.get_status_display }}
+                            </span>
+                        {% elif item.status == 'rented' %}
+                            <span class="badge badge-status rented">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="6" fill="#1caac0"/></svg>
+                                {{ item.get_status_display }}
+                            </span>
+                        {% else %}
+                            <span class="badge badge-status maintenance">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#1b1f2c"/></svg>
+                                {{ item.get_status_display }}
+                            </span>
+                        {% endif %}
                     </td>
                     <td>{{ item.added_at|date:"d.m.Y" }}</td>
                     <td>
@@ -44,6 +84,12 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-state">
+            <svg width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="20" fill="#E9EAE4"/><path d="M20 40h40M40 20v40" stroke="#5fc0cc" stroke-width="4"/></svg>
+            <p>Нет оборудования</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

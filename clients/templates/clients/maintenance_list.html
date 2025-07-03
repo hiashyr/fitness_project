@@ -2,18 +2,40 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Обслуживания оборудования</h2>
-        <a href="{% url 'maintenance_create' %}" class="btn btn-primary">Добавить обслуживание</a>
+        <h2 class="maintenance-title">
+            <svg class="icon-title" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="8" fill="#1caac0"/><path d="M7 12h10" stroke="#fff" stroke-width="2"/></svg>
+            Обслуживания оборудования
+        </h2>
+        <a href="{% url 'maintenance_create' %}" class="btn btn-primary">
+            <svg class="icon-btn" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="14" height="10" rx="2" fill="#fff"/><path d="M2 7h14" stroke="#5fc0cc" stroke-width="2"/></svg>
+            Добавить обслуживание
+        </a>
     </div>
-    <div class="table-responsive">
-        <table class="table table-striped">
+    <div class="table-responsive maintenance-table-wrapper">
+        {% if maintenances %}
+        <table class="table maintenance-table">
             <thead>
                 <tr>
-                    <th>Оборудование</th>
-                    <th>Статус</th>
-                    <th>Начало</th>
-                    <th>Окончание</th>
-                    <th>Исполнитель</th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" rx="4" fill="#5fc0cc"/><path d="M4 8h8" stroke="#fff" stroke-width="2"/></svg>
+                        Оборудование
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7" fill="#1caac0"/><path d="M8 4v4l2 2" stroke="#fff" stroke-width="2"/></svg>
+                        Статус
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="12" height="12" rx="3" fill="#E9EAE4" stroke="#1b1f2c" stroke-width="1.5"/><path d="M5 5h6v6H5z" fill="#5fc0cc"/></svg>
+                        Начало
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" rx="8" fill="#1b1f2c"/><path d="M5 8h6" stroke="#fff" stroke-width="2"/></svg>
+                        Окончание
+                    </th>
+                    <th>
+                        <svg class="icon-th" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7" fill="#5fc0cc"/><path d="M8 4v8" stroke="#fff" stroke-width="2"/></svg>
+                        Исполнитель
+                    </th>
                     <th></th>
                 </tr>
             </thead>
@@ -21,20 +43,41 @@
                 {% for m in maintenances %}
                 <tr>
                     <td>{{ m.equipment.name }}</td>
-                    <td>{{ m.get_status_display }}</td>
+                    <td>
+                        {% if m.status == 'in_progress' %}
+                            <span class="badge badge-status maintenance-in-progress">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="6" fill="#1caac0"/></svg>
+                                В процессе
+                            </span>
+                        {% elif m.status == 'completed' %}
+                            <span class="badge badge-status maintenance-completed">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#5fc0cc"/></svg>
+                                Завершено
+                            </span>
+                        {% else %}
+                            <span class="badge badge-status maintenance-other">
+                                <svg class="icon-status" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#E9EAE4"/></svg>
+                                {{ m.get_status_display }}
+                            </span>
+                        {% endif %}
+                    </td>
                     <td>{{ m.start_date|date:'d.m.Y H:i' }}</td>
                     <td>{% if m.end_date %}{{ m.end_date|date:'d.m.Y H:i' }}{% else %}-{% endif %}</td>
                     <td>{{ m.performed_by|default:'-' }}</td>
-                    <td>
+                    <td class="text-end">
                         <a href="{% url 'maintenance_detail' m.pk %}" class="btn btn-sm btn-info">Просмотр</a>
-                        <a href="{% url 'maintenance_edit' m.pk %}" class="btn btn-sm btn-secondary">Редактировать</a>
+                        <a href="{% url 'maintenance_edit' m.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
                     </td>
                 </tr>
-                {% empty %}
-                <tr><td colspan="6" class="text-center">Нет записей об обслуживании</td></tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-state">
+            <svg width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" rx="20" fill="#E9EAE4"/><path d="M20 40h40M40 20v40" stroke="#5fc0cc" stroke-width="4"/></svg>
+            <p>Нет записей об обслуживании</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %} 

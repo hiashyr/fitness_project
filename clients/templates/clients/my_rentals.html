@@ -6,14 +6,16 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2 class="mb-0 text-primary fw-bold">Мои аренды</h2>
         <div class="d-flex gap-2 align-items-center">
-            <form method="get" class="d-flex align-items-center me-2">
-                <select name="status" class="form-select me-2" onchange="this.form.submit()">
+            <form method="get" class="d-flex align-items-center me-2" style="gap:0.5em;">
+                <select name="status" class="form-select me-2" style="min-width:120px" onchange="this.form.submit()">
                     <option value="" {% if not status %}selected{% endif %}>Все</option>
                     <option value="active" {% if status == 'active' %}selected{% endif %}>Активные</option>
                     <option value="returned" {% if status == 'returned' %}selected{% endif %}>Завершённые</option>
                 </select>
+                <input type="text" name="search" class="form-control me-2" placeholder="Поиск по оборудованию" value="{{ request.GET.search|default:'' }}" style="min-width:180px" />
+                <button type="submit" class="btn btn-outline-primary">Поиск</button>
             </form>
-            <a href="?export=csv{% if status %}&status={{ status }}{% endif %}" class="btn btn-outline-primary">
+            <a href="?export=csv{% if status %}&status={{ status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" class="btn btn-outline-primary">
                 <i class="fas fa-download me-1"></i> Экспорт
             </a>
         </div>

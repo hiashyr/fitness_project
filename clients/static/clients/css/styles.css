@@ -340,3 +340,406 @@ main {
     border: none !important;
     box-shadow: none !important;
 }
+
+/* --- Современная таблица инвентаря --- */
+.equipment-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #1b1f2c;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 1.2em;
+}
+.icon-title {
+    vertical-align: middle;
+    margin-right: 0.3em;
+}
+.equipment-table-wrapper {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(31, 170, 192, 0.10);
+    padding: 1.5em 1em;
+}
+.equipment-table {
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+.equipment-table thead th {
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08em;
+    border: none;
+    vertical-align: middle;
+    padding: 1em 0.7em;
+    text-align: center;
+}
+.equipment-table tbody td {
+    vertical-align: middle;
+    text-align: center;
+    font-size: 1.04em;
+    padding: 0.85em 0.7em;
+    border-bottom: 1px solid #E9EAE4;
+}
+.equipment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.icon-th {
+    margin-right: 0.3em;
+    vertical-align: middle;
+}
+
+/* --- Бейджи статусов --- */
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 1em;
+    padding: 0.45em 1.1em 0.45em 0.7em;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.07);
+}
+.badge-status.available {
+    background: #e6f2ff;
+    color: #1caac0;
+}
+.badge-status.rented {
+    background: #fff3cd;
+    color: #1b1f2c;
+}
+.badge-status.maintenance {
+    background: #f2f2f2;
+    color: #1b1f2c;
+}
+.icon-status {
+    margin-right: 0.2em;
+}
+
+/* --- Форма фильтра и поиска --- */
+.equipment-filter-form {
+    gap: 0.7em;
+    align-items: center;
+}
+.equipment-filter-form .form-control,
+.equipment-filter-form .form-select {
+    min-width: 180px;
+    border-radius: 2em;
+    border: 1.5px solid #5fc0cc;
+    font-size: 1em;
+    padding: 0.5em 1.1em;
+    background: #E9EAE4;
+    color: #1b1f2c;
+    transition: border 0.2s;
+}
+.equipment-filter-form .form-control:focus,
+.equipment-filter-form .form-select:focus {
+    border-color: #1caac0;
+    outline: none;
+}
+.equipment-filter-form .btn-primary {
+    border-radius: 2em;
+    padding: 0.5em 1.5em;
+    font-weight: 600;
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%);
+    border: none;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.10);
+    transition: background 0.2s;
+}
+.equipment-filter-form .btn-primary:hover {
+    background: #1caac0;
+}
+.icon-btn {
+    margin-right: 0.4em;
+    vertical-align: middle;
+}
+
+/* --- Пустое состояние --- */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3em 0 2em 0;
+    color: #1caac0;
+    font-size: 1.2em;
+    opacity: 0.8;
+}
+.empty-state svg {
+    margin-bottom: 1em;
+}
+
+/* --- Адаптивность --- */
+@media (max-width: 900px) {
+    .equipment-table-wrapper {
+        padding: 0.5em 0.2em;
+    }
+    .equipment-table thead th, .equipment-table tbody td {
+        font-size: 0.98em;
+        padding: 0.6em 0.3em;
+    }
+}
+@media (max-width: 600px) {
+    .equipment-title {
+        font-size: 1.2rem;
+    }
+    .equipment-table-wrapper {
+        padding: 0.2em 0.1em;
+    }
+    .equipment-table {
+        font-size: 0.95em;
+        min-width: 600px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .equipment-filter-form .form-control,
+    .equipment-filter-form .form-select {
+        min-width: 120px;
+        font-size: 0.95em;
+    }
+}
+
+/* --- Современная таблица обслуживания --- */
+.maintenance-title {
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: #1b1f2c;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 1.2em;
+}
+.maintenance-table-wrapper {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(31, 170, 192, 0.10);
+    padding: 1.5em 1em;
+}
+.maintenance-table {
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+.maintenance-table thead th {
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.08em;
+    border: none;
+    vertical-align: middle;
+    padding: 1em 0.7em;
+    text-align: center;
+}
+.maintenance-table tbody td {
+    vertical-align: middle;
+    text-align: center;
+    font-size: 1.04em;
+    padding: 0.85em 0.7em;
+    border-bottom: 1px solid #E9EAE4;
+}
+.maintenance-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.maintenance-table .icon-th {
+    margin-right: 0.3em;
+    vertical-align: middle;
+}
+.maintenance-table .icon-status {
+    margin-right: 0.2em;
+}
+
+/* --- Бейджи статусов обслуживания --- */
+.badge-status.maintenance-in-progress {
+    background: #e6f2ff;
+    color: #1caac0;
+}
+.badge-status.maintenance-completed {
+    background: #e6ffe6;
+    color: #1b1f2c;
+}
+.badge-status.maintenance-other {
+    background: #f2f2f2;
+    color: #1b1f2c;
+}
+
+/* --- Кнопки действий --- */
+.maintenance-table .btn-info {
+    background: #5fc0cc;
+    color: #fff;
+    border: none;
+    border-radius: 2em;
+    font-weight: 600;
+    padding: 0.4em 1.2em;
+    margin-right: 0.3em;
+    transition: background 0.2s;
+}
+.maintenance-table .btn-info:hover {
+    background: #1caac0;
+    color: #fff;
+}
+.maintenance-table .btn-outline-primary {
+    border-radius: 2em;
+    padding: 0.4em 1.2em;
+    font-weight: 600;
+    border: 1.5px solid #1caac0;
+    color: #1caac0;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+}
+.maintenance-table .btn-outline-primary:hover {
+    background: #1caac0;
+    color: #fff;
+}
+
+/* --- Адаптивность --- */
+@media (max-width: 900px) {
+    .maintenance-table-wrapper {
+        padding: 0.5em 0.2em;
+    }
+    .maintenance-table thead th, .maintenance-table tbody td {
+        font-size: 0.98em;
+        padding: 0.6em 0.3em;
+    }
+}
+@media (max-width: 600px) {
+    .maintenance-title {
+        font-size: 1.2rem;
+    }
+    .maintenance-table-wrapper {
+        padding: 0.2em 0.1em;
+    }
+    .maintenance-table {
+        font-size: 0.95em;
+        min-width: 600px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+/* --- Карточки доступного оборудования --- */
+.equipment-card-row {
+    row-gap: 2rem;
+}
+.equipment-card {
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(31, 170, 192, 0.10);
+    background: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+}
+.equipment-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 32px rgba(31, 170, 192, 0.13);
+}
+.equipment-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1caac0;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+.equipment-card-desc {
+    color: #7a8a99;
+    font-size: 1em;
+}
+.icon-equip {
+    margin-right: 0.4em;
+    vertical-align: middle;
+}
+.equip-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 1em;
+    padding: 0.45em 1.1em 0.45em 0.7em;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.07);
+}
+.equip-badge-available {
+    background: #e6f2ff;
+    color: #1caac0;
+}
+.equip-badge-rented {
+    background: #fff3cd;
+    color: #1b1f2c;
+}
+.equip-badge-overdue {
+    background: #ffeaea;
+    color: #ff4d4f;
+}
+.icon-status {
+    margin-right: 0.2em;
+}
+.equip-progress-bar {
+    height: 7px;
+    background: #e9eae4;
+    border-radius: 6px;
+    margin-bottom: 0.2em;
+    overflow: hidden;
+}
+.equip-progress-fill {
+    border-radius: 6px;
+    transition: width 0.4s;
+}
+.equip-btn-book {
+    border-radius: 2em;
+    font-weight: 600;
+    background: linear-gradient(90deg, #5fc0cc 0%, #1caac0 100%);
+    border: none;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(31, 170, 192, 0.10);
+    padding: 0.7em 0;
+    font-size: 1.08em;
+    transition: background 0.2s;
+}
+.equip-btn-book:hover {
+    background: #1caac0;
+    color: #fff;
+}
+.equip-btn-disabled {
+    border-radius: 2em;
+    font-weight: 600;
+    color: #aaa;
+    background: #f2f2f2;
+    border: 1.5px solid #e9eae4;
+    padding: 0.7em 0;
+    font-size: 1.08em;
+}
+.icon-btn {
+    margin-right: 0.4em;
+    vertical-align: middle;
+}
+.equipment-card-empty {
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(31, 170, 192, 0.10);
+}
+
+@media (max-width: 900px) {
+    .equipment-card-title {
+        font-size: 1.1rem;
+    }
+    .equipment-card-row {
+        row-gap: 1.2rem;
+    }
+}
+@media (max-width: 600px) {
+    .equipment-card-title {
+        font-size: 1rem;
+    }
+    .equipment-card-desc {
+        font-size: 0.95em;
+    }
+    .equipment-card-row {
+        row-gap: 0.7rem;
+    }
+}

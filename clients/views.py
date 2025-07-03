@@ -29,9 +29,14 @@ class AllEquipmentView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_trainer()
     
     def get_queryset(self):
-        return Equipment.objects.all() \
-            .select_related() \
-            .order_by('status', 'name')
+        queryset = Equipment.objects.all().select_related().order_by('status', 'name')
+        status = self.request.GET.get('status')
+        search = self.request.GET.get('search')
+        if status:
+            queryset = queryset.filter(status=status)
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,15 +75,15 @@ class RentalHistoryView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_trainer()
     
     def get_queryset(self):
-        queryset = super().get_queryset() \
-            .select_related('client', 'equipment')
-        
+        queryset = super().get_queryset().select_related('client', 'equipment')
         status = self.request.GET.get('status')
+        search = self.request.GET.get('search')
         if status == 'active':
             queryset = queryset.filter(returned_at__isnull=True)
         elif status == 'returned':
             queryset = queryset.filter(returned_at__isnull=False)
-            
+        if search:
+            queryset = queryset.filter(equipment__name__icontains=search)
         return queryset
     
     def get(self, request, *args, **kwargs):
@@ -206,10 +211,13 @@ class MyRentalsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         qs = Rental.objects.filter(client=self.request.user).select_related('equipment').order_by('-start_time')
         status = self.request.GET.get('status')
+        search = self.request.GET.get('search')
         if status == 'active':
             qs = qs.filter(returned_at__isnull=True)
         elif status == 'returned':
             qs = qs.filter(returned_at__isnull=False)
+        if search:
+            qs = qs.filter(equipment__name__icontains=search)
         return qs
 
     def get(self, request, *args, **kwargs):
